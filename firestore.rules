@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // CAMBIA ESTE CORREO por el del barbero (el mismo que crees en Firebase Authentication)
+    function isBarber() {
+      return request.auth != null
+          && request.auth.token.email == 'barbero@tucorreo.com';
+    }
+
+    // Citas con datos personales: solo el barbero puede listarlas.
+    // El cliente solo puede leer SU cita porque conoce su ID único.
+    match /citas/{id} {
+      allow get: if true;
+      allow list: if isBarber();
+
+      allow create: if request.resource.data.status == 'pendiente'
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() >= 2
+                    && request.resource.data.name.size() <= 60
+                    && request.resource.data.phone is string
+                    && request.resource.data.phone.matches('^1[0-9]{10}$')
+                    && request.resource.data.services is list
+                    && request.resource.data.slots is list
+                    && request.resource.data.slots.size() <= 8;
+
+      // El cliente solo puede cambiar el estado a "cancelada"
+      allow update: if isBarber()
+                    || (resource.data.status in ['pendiente', 'confirmada']
+                        && request.resource.data.status == 'cancelada'
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']));
+
+      allow delete: if isBarber();
+    }
+
+    // Horas ocupadas (sin datos personales). Evita reservas dobles.
+    match /ocupados/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['date', 'time']);
+      allow update: if false;
+      allow delete: if true;
+    }
+  }
+}

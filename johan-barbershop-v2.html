@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Johan Barbershop | Agenda tu cita</title>
+
+  <style>
+    :root {
+      --bg: #0e0e0f;
+      --panel: #171719;
+      --gold: #d8aa55;
+      --gold2: #f1ce83;
+      --cream: #f7f0e2;
+      --muted: #aaa6a0;
+      --green: #6fcf97;
+      --red: #ff8b8b;
+      --border: rgba(216,170,85,.25);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(216,170,85,.12), transparent 30%),
+        radial-gradient(circle at 90% 80%, rgba(216,170,85,.08), transparent 28%),
+        var(--bg);
+      color: var(--cream);
+      min-height: 100vh;
+    }
+
+    [hidden] { display: none !important; }
+
+    /* HEADER */
+    header {
+      padding: 25px 7%;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: rgba(14,14,15,.9);
+      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .logo {
+      width: 50px; height: 50px;
+      border: 2px solid var(--gold); border-radius: 50%;
+      display: grid; place-items: center;
+      color: var(--gold); font-weight: bold; font-size: 19px;
+    }
+    .brand h1 { margin: 0; font-family: Georgia, serif; font-size: 24px; }
+    .brand span {
+      display: block; color: var(--gold2); font-size: 10px;
+      letter-spacing: 2px; text-transform: uppercase; margin-top: 4px;
+    }
+    .business-info { text-align: right; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .business-info strong {
+      display: block; color: var(--gold2); font-size: 11px;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+
+    /* HERO */
+    .hero { padding: 65px 7% 35px; text-align: center; }
+    .eyebrow { color: var(--gold2); letter-spacing: 4px; font-size: 12px; text-transform: uppercase; }
+    .hero h2 { font-family: Georgia, serif; font-size: clamp(40px, 6vw, 70px); margin: 15px 0 10px; }
+    .hero p { color: var(--muted); max-width: 650px; margin: auto; font-size: 16px; line-height: 1.7; }
+    .hero-contact { margin-top: 18px; color: var(--gold2); font-size: 14px; line-height: 1.7; }
+    .hero-contact a { color: inherit; text-decoration: none; font-weight: bold; }
+
+    /* MAIN */
+    main { max-width: 1100px; margin: auto; padding: 25px 7% 70px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; align-items: start; }
+    .card {
+      background: linear-gradient(145deg, rgba(32,32,35,.96), rgba(18,18,20,.98));
+      border: 1px solid var(--border);
+      border-radius: 22px; padding: 27px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.3);
+    }
+    .card h3 { margin: 0 0 20px; font-family: Georgia, serif; font-size: 25px; }
+
+    /* SERVICIOS */
+    .services { display: grid; gap: 12px; }
+    .service {
+      border: 1px solid rgba(255,255,255,.08);
+      background: #19191b; border-radius: 15px; padding: 17px;
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; transition: .2s; user-select: none;
+    }
+    .service:hover { border-color: var(--gold); transform: translateY(-2px); }
+    .service.selected { border-color: var(--gold); background: rgba(216,170,85,.10); }
+    .service.selected strong::before { content: '✓ '; color: var(--gold2); }
+    .service strong { display: block; font-size: 16px; }
+    .service small { color: var(--muted); display: block; margin-top: 4px; }
+    .price { color: var(--gold2); font-weight: bold; white-space: nowrap; font-size: 16px; }
+    .services-hint { color: var(--muted); font-size: 12px; margin: 14px 2px 0; }
+
+    /* FORMULARIO */
+    label { display: block; color: #d8d4cd; font-size: 13px; margin: 18px 0 8px; }
+    input, select {
+      width: 100%; padding: 14px 15px;
+      border-radius: 12px; border: 1px solid rgba(255,255,255,.12);
+      background: #111113; color: var(--cream);
+      font-size: 15px; outline: none;
+    }
+    input:focus, select:focus { border-color: var(--gold); }
+    .hint { color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.5; }
+
+    /* HORARIOS */
+    .times { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; margin-top: 8px; }
+    .times .hint { grid-column: 1 / -1; font-size: 14px; }
+    .time {
+      padding: 11px 7px; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: #111113; color: #eee; cursor: pointer; font-size: 14px;
+    }
+    .time:hover:not(:disabled) { border-color: var(--gold); }
+    .time.selected { background: var(--gold); color: #111; border-color: var(--gold); font-weight: bold; }
+    .time.unavailable { opacity: .3; cursor: not-allowed; text-decoration: line-through; }
+
+    /* RESUMEN */
+    .summary {
+      margin-top: 22px; padding: 18px; border-radius: 14px;
+      background: #101012; border: 1px dashed var(--border);
+      line-height: 1.8; color: #d9d5cd;
+    }
+    .summary b { color: var(--gold2); }
+
+    /* BOTONES */
+    .cta {
+      display: block; width: 100%; margin-top: 18px; padding: 16px;
+      border: none; border-radius: 12px;
+      background: linear-gradient(90deg, var(--gold), var(--gold2));
+      color: #111; font-weight: bold; font-size: 16px;
+      cursor: pointer; transition: .2s;
+      text-align: center; text-decoration: none;
+    }
+    .cta:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); }
+    .cta:disabled { opacity: .6; cursor: wait; }
+
+    .btn {
+      display: inline-block; padding: 11px 14px; border-radius: 10px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--gold2); cursor: pointer; font-size: 14px;
+      text-decoration: none; font-family: inherit;
+    }
+    .btn.primary { background: var(--gold); color: #111; border-color: var(--gold); font-weight: bold; }
+    .btn.wa { background: #25d366; color: #08140c; border-color: #25d366; font-weight: bold; }
+    .btn.danger { color: var(--red); border-color: rgba(255,120,120,.4); }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+    /* ESTADO DE LA CITA (CLIENTE) */
+    .notice {
+      margin-top: 20px; padding: 19px; border-radius: 15px;
+      border: 1px solid rgba(216,170,85,.35);
+      background: rgba(216,170,85,.07);
+    }
+    .notice.confirmada { border-color: rgba(111,207,151,.35); background: rgba(111,207,151,.08); }
+    .notice.cancelada { border-color: rgba(255,120,120,.35); background: rgba(255,120,120,.07); }
+    .notice strong { font-size: 17px; }
+    #confirmation { margin-top: 10px; line-height: 1.6; }
+    #countdown { margin-top: 10px; color: #ddd; }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 99px;
+      font-size: 12px; font-weight: bold; white-space: nowrap;
+    }
+    .badge.pendiente { background: rgba(216,170,85,.2); color: var(--gold2); }
+    .badge.confirmada { background: rgba(111,207,151,.18); color: var(--green); }
+    .badge.cancelada { background: rgba(255,120,120,.15); color: var(--red); }
+
+    /* MODO DEMO */
+    .demo-banner {
+      margin: 0 0 20px; padding: 12px 16px; border-radius: 12px;
+      background: rgba(255,200,80,.1); border: 1px solid rgba(255,200,80,.35);
+      color: #ffd98a; font-size: 13px; line-height: 1.6;
+    }
+
+    /* PANEL DEL BARBERO */
+    #barberApp { display: none; max-width: 760px; margin: 0 auto; }
+    body.barber-mode #barberApp { display: block; }
+    body.barber-mode .client-only { display: none !important; }
+    .panel-top {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      justify-content: space-between; align-items: center; margin-bottom: 18px;
+    }
+    .panel-top h3 { margin: 0; }
+    .panel-top .tools { display: flex; gap: 8px; align-items: center; }
+    .panel-top select { width: auto; padding: 10px 12px; }
+    .day-title {
+      margin: 22px 0 10px; color: var(--gold2);
+      font-family: Georgia, serif; font-size: 18px; text-transform: capitalize;
+    }
+    .appt {
+      padding: 16px; margin-bottom: 12px; border-radius: 14px;
+      background: #19191b; border: 1px solid rgba(255,255,255,.08);
+      line-height: 1.6;
+    }
+    .appt.pendiente { border-color: rgba(216,170,85,.45); }
+    .appt.confirmada { border-color: rgba(111,207,151,.35); }
+    .appt.cancelada { opacity: .55; }
+    .appt-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .appt-top b { font-size: 18px; }
+    .appt small { color: var(--muted); }
+    .empty { color: var(--muted); padding: 20px 0; text-align: center; }
+    .error { color: var(--red); font-size: 14px; margin-top: 12px; }
+
+    /* GALERÍA */
+    .gallery { margin-top: 25px; }
+    .gallery h3 { font-family: Georgia, serif; color: var(--gold2); text-align: center; margin: 0 0 16px; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+    .gallery-grid img {
+      width: 100%; aspect-ratio: 1; object-fit: cover;
+      border-radius: 14px; border: 1px solid var(--border);
+    }
+
+    /* UBICACIÓN */
+    .location-card {
+      margin-top: 25px; text-align: center; padding: 25px;
+      background: rgba(216,170,85,.05);
+      border: 1px solid var(--border); border-radius: 18px;
+    }
+    .location-card h3 { font-family: Georgia, serif; margin-top: 0; color: var(--gold2); }
+    .location-card p { color: var(--muted); margin: 8px 0; }
+    .phone { color: var(--gold2); text-decoration: none; font-weight: bold; font-size: 17px; }
+    .map {
+      width: 100%; height: 260px; border: 0; border-radius: 14px;
+      margin-top: 16px; filter: grayscale(.4) contrast(1.05);
+    }
+    .location-links { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 16px; }
+
+    /* WHATSAPP FLOTANTE */
+    .wa-float {
+      position: fixed; right: 18px; bottom: 18px; z-index: 20;
+      background: #25d366; color: #08140c; font-weight: bold;
+      padding: 13px 18px; border-radius: 999px; text-decoration: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,.45); font-size: 15px;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 32px; color: #777;
+      border-top: 1px solid rgba(255,255,255,.06);
+      font-size: 13px; line-height: 1.8;
+    }
+    .footer-name { color: var(--gold2); font-family: Georgia, serif; font-size: 20px; margin-bottom: 5px; }
+    .footer-address { color: #aaa6a0; }
+    footer a { color: var(--gold2); text-decoration: none; }
+
+    /* RESPONSIVE */
+    @media(max-width:760px) {
+      header { padding: 20px 5%; flex-direction: column; align-items: flex-start; gap: 15px; }
+      .business-info { text-align: left; }
+      .grid { grid-template-columns: 1fr; }
+      .hero { padding: 48px 5% 25px; }
+      main { padding: 20px 5% 55px; }
+      .times { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="brand">
+    <div class="logo">JB</div>
+    <div>
+      <h1>Johan Barbershop</h1>
+      <span>Estilo • Precisión • Confianza</span>
+    </div>
+  </div>
+
+  <div class="business-info">
+    <strong>📍 Dirección</strong>
+    Dionisio de Peralvillo, 92000,<br>
+    República Dominicana
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero client-only">
+  <div class="eyebrow">Reserva tu momento</div>
+  <h2>Agenda tu cita</h2>
+  <p>
+    Elige uno o varios servicios, selecciona la fecha y el horario que prefieras,
+    regístrate con tu nombre y teléfono, y disfruta de tu experiencia en Johan Barbershop.
+  </p>
+  <div class="hero-contact">
+    📍 Dionisio de Peralvillo, 92000, República Dominicana<br>
+    📞 <a href="tel:+18299150806">829-915-0806</a>
+  </div>
+</section>
+
+<main>
+
+  <div id="demoBanner" class="demo-banner" hidden>
+    ⚠️ <b>Modo demostración:</b> las citas solo se guardan en este navegador.
+    Para que funcione con clientes reales hay que conectar Firebase (ver instrucciones).
+  </div>
+
+  <!-- ============ PANEL DEL BARBERO (#barbero) ============ -->
+  <section class="card" id="barberApp">
+
+    <div id="loginBox" hidden>
+      <h3>🔒 Acceso del barbero</h3>
+      <label for="loginEmail">Correo</label>
+      <input type="email" id="loginEmail" autocomplete="username">
+      <label for="loginPass">Contraseña</label>
+      <input type="password" id="loginPass" autocomplete="current-password">
+      <button class="cta" id="loginBtn">Entrar</button>
+      <div class="error" id="loginError"></div>
+    </div>
+
+    <div id="panelBox" hidden>
+      <div class="panel-top">
+        <h3 id="panelTitle">✂️ Agenda</h3>
+        <div class="tools">
+          <select id="panelFilter">
+            <option value="hoy">Hoy</option>
+            <option value="proximas">Próximos 7 días</option>
+            <option value="todas">Todas (con canceladas)</option>
+          </select>
+          <button class="btn" id="logoutBtn">Salir</button>
+        </div>
+      </div>
+      <div id="apptList"></div>
+    </div>
+
+  </section>
+
+  <div class="grid client-only">
+
+    <!-- SERVICIOS -->
+    <section class="card">
+      <h3>1. Elige tu servicio</h3>
+
+      <div class="services" id="services">
+
+        <div class="service" data-name="Cejas" data-price="150" data-duration="30">
+          <div>
+            <strong>Cejas</strong>
+            <small>Diseño y arreglo</small>
+          </div>
+          <div class="price">DOP 150</div>
+        </div>
+
+        <div class="service" data-name="Corte hombre" data-price="500" data-duration="30">
+          <div>
+            <strong>Corte hombre</strong>
+            <small>Corte clásico o moderno</small>
+          </div>
+          <div class="price">DOP 500</div>
+        </div>
+
+        <div class="service" data-name="Corte niño" data-price="300" data-duration="30">
+          <div>
+            <strong>Corte niño</strong>
+            <small>Para los más pequeños</small>
+          </div>
+          <div class="price">DOP 300</div>
+        </div>
+
+        <div class="service" data-name="Corte adolescente" data-price="400" data-duration="30">
+          <div>
+            <strong>Corte adolescente</strong>
+            <small>Estilo a tu medida</small>
+          </div>
+          <div class="price">DOP 400</div>
+        </div>
+
+      </div>
+      <div class="services-hint">Puedes elegir más de un servicio (por ejemplo, corte + cejas).</div>
+    </section>
+
+    <!-- AGENDA -->
+    <section class="card">
+      <h3>2. Fecha, horario y tus datos</h3>
+
+      <label for="date">Selecciona una fecha</label>
+      <input type="date" id="date">
+
+      <label>Horarios disponibles</label>
+      <div class="times" id="times"></div>
+
+      <label for="clientName">Tu nombre</label>
+      <input type="text" id="clientName" placeholder="Nombre y apellido" autocomplete="name" maxlength="60">
+
+      <label for="clientPhone">Tu número de teléfono</label>
+      <input type="tel" id="clientPhone" placeholder="809-000-0000" autocomplete="tel" maxlength="20">
+      <div class="hint">Te escribiremos a este número (WhatsApp) cuando el barbero confirme tu cita.</div>
+
+      <!-- RESUMEN -->
+      <div class="summary">
+        <div>Servicio: <b id="sumService">No seleccionado</b></div>
+        <div>Duración: <b id="sumDuration">—</b></div>
+        <div>Fecha: <b id="sumDate">—</b></div>
+        <div>Hora: <b id="sumTime">—</b></div>
+        <div>Cliente: <b id="sumName">—</b></div>
+        <div>Teléfono: <b id="sumPhone">—</b></div>
+        <div>Total: <b id="sumPrice">DOP 0</b></div>
+      </div>
+
+      <button class="cta" id="book">Solicitar mi cita</button>
+
+      <!-- ESTADO DE MI CITA -->
+      <div class="notice" id="notice" hidden>
+        <strong id="noticeTitle"></strong>
+        <div id="confirmation"></div>
+        <div id="countdown"></div>
+        <div class="btn-row" id="noticeButtons">
+          <a class="btn wa" id="btnWhatsBarber" href="#" target="_blank" rel="noopener">📲 Avisar al barbero por WhatsApp</a>
+          <button class="btn" id="btnChange" type="button">🔁 Cambiar mi cita</button>
+          <button class="btn danger" id="btnCancel" type="button">✕ Cancelar mi cita</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- GALERÍA (se muestra solo si agregas fotos en GALLERY) -->
+  <section class="gallery client-only" id="gallery" hidden>
+    <h3>Nuestros trabajos</h3>
+    <div class="gallery-grid" id="galleryGrid"></div>
+  </section>
+
+  <!-- UBICACIÓN -->
+  <div class="location-card client-only">
+    <h3>📍 Visítanos en Johan Barbershop</h3>
+    <p>Dionisio de Peralvillo, 92000, República Dominicana</p>
+    <p>📞 <a class="phone" href="tel:+18299150806">829-915-0806</a></p>
+
+    <iframe class="map" id="mapFrame" loading="lazy" title="Ubicación de Johan Barbershop"></iframe>
+
+    <div class="location-links">
+      <a class="btn primary" id="mapsLink" href="#" target="_blank" rel="noopener">🗺️ Cómo llegar</a>
+      <a class="btn wa" id="waLink" href="#" target="_blank" rel="noopener">💬 Escríbenos por WhatsApp</a>
+      <a class="btn" id="igLink" href="#" target="_blank" rel="noopener" hidden>📸 Instagram</a>
+    </div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-name">Johan Barbershop</div>
+  <div class="footer-address">📍 Dionisio de Peralvillo, 92000, República Dominicana</div>
+  <div style="margin-top:8px;">© 2026 Johan Barbershop · Agenda tu estilo</div>
+  <div><a href="#barbero">Acceso barbero</a></div>
+</footer>
+
+<a class="wa-float client-only" id="waFloat" href="#" target="_blank" rel="noopener">💬 WhatsApp</a>
+
+
+<!-- Firebase (solo se usa si pegas tu configuración en FIREBASE_CONFIG) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+
+  /* =====================================================
+     CONFIGURACIÓN (edita solo esta parte)
+  ===================================================== */
+
+  // Número del barbero, con código de país y sin signos
+  const BARBER_PHONE = '18299150806';
+
+  // Minutos antes de la cita para avisar "Ya casi es su turno"
+  const REMINDER_MINUTES = 30;
+
+  const ADDRESS = 'Dionisio de Peralvillo, 92000, República Dominicana';
+
+  // Instagram del negocio (déjalo '' si no tienen). Ej: 'https://instagram.com/johanbarbershop'
+  const INSTAGRAM_URL = '';
+
+  // Fotos de cortes. Ej: [{ src: 'fotos/corte1.jpg', alt: 'Corte fade' }]
+  const GALLERY = [];
+
+  // Duración de cada bloque de agenda (minutos)
+  const SLOT = 30;
+
+  // Horario por día de la semana (0 = domingo ... 6 = sábado). null = cerrado.
+  // "breaks" son pausas, por ejemplo: breaks: [['13:00','14:00']]
+  const SCHEDULE = {
+    0: null,
+    1: { open: '09:00', close: '19:00', breaks: [] },
+    2: { open: '09:00', close: '19:00', breaks: [] },
+    3: { open: '09:00', close: '19:00', breaks: [] },
+    4: { open: '09:00', close: '19:00', breaks: [] },
+    5: { open: '09:00', close: '19:00', breaks: [] },
+    6: { open: '09:00', close: '19:00', breaks: [] }
+  };
+
+  // Días libres o feriados (formato AAAA-MM-DD). Ej: ['2026-12-25']
+  const DAYS_OFF = [];
+
+  // Cuántos días hacia adelante se puede reservar
+  const MAX_DAYS_AHEAD = 60;
+
+  // Configuración de Firebase. Mientras sea null, la página funciona en modo demostración.
+  // Ejemplo:
+  // const FIREBASE_CONFIG = {
+  //   apiKey: '...', authDomain: '...', projectId: '...', appId: '...'
+  // };
+  const FIREBASE_CONFIG = null;
+
+
+  /* =====================================================
+     UTILIDADES
+  ===================================================== */
+
+  const $ = (id) => document.getElementById(id);
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function escapeHTML(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function todayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }
+
+  function addDaysStr(dateStr, days) {
+    const d = new Date(dateStr + 'T12:00:00');
+    d.setDate(d.getDate() + days);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  }
+
+  function formatDate(dateString) {
+    return new Date(dateString + 'T12:00:00').toLocaleDateString('es-DO', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+  }
+
+  function toMin(hhmmText) {
+    const [h, m] = hhmmText.split(':').map(Number);
+    return h * 60 + m;
+  }
+
+  function hhmm(min) { return pad(Math.floor(min / 60)) + pad(min % 60); }
+
+  function minLabel(min) {
+    let h = Math.floor(min / 60);
+    const m = min % 60;
+    const period = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${h}:${pad(m)} ${period}`;
+  }
+
+  function cleanPhone(value) {
+    let digits = String(value || '').replace(/\D/g, '');
+    if (digits.length === 10) digits = '1' + digits;
+    return digits;
+  }
+
+  function isValidPhone(digits) { return /^1\d{10}$/.test(digits); }
+
+  function prettyPhone(digits) {
+    const d = String(digits).replace(/^1/, '');
+    return d.length === 10 ? `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}` : digits;
+  }
+
+  function appointmentDate(c) {
+    const d = new Date(c.date + 'T00:00:00');
+    d.setHours(Math.floor(c.startMin / 60), c.startMin % 60, 0, 0);
+    return d;
+  }
+
+  function appointmentEnd(c) {
+    return new Date(appointmentDate(c).getTime() + c.durationMin * 60000);
+  }
+
+  function servicesText(c) { return c.services.join(' + '); }
+
+  function storageGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+  function storageSet(key, v) { try { localStorage.setItem(key, v); } catch (e) {} }
+  function storageDel(key) { try { localStorage.removeItem(key); } catch (e) {} }
+
+  function notify(body) {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try { new Notification('Johan Barbershop', { body }); } catch (e) {}
+    }
+  }
+
+  function beep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      osc.connect(ctx.destination);
+      osc.frequency.value = 880;
+      osc.start();
+      setTimeout(() => { osc.stop(); ctx.close(); }, 250);
+    } catch (e) {}
+  }
+
+
+  /* =====================================================
+     HORARIO DEL NEGOCIO
+  ===================================================== */
+
+  // Devuelve la lista de bloques (en minutos) de ese día, o null si está cerrado
+  function dayBlocks(dateStr) {
+    if (DAYS_OFF.includes(dateStr)) return null;
+    const day = new Date(dateStr + 'T12:00:00').getDay();
+    const cfg = SCHEDULE[day];
+    if (!cfg) return null;
+
+    const open = toMin(cfg.open);
+    const close = toMin(cfg.close);
+    const breaks = (cfg.breaks || []).map(([a, b]) => [toMin(a), toMin(b)]);
+
+    const blocks = [];
+    for (let m = open; m < close; m += SLOT) {
+      if (!breaks.some(([a, b]) => m >= a && m < b)) blocks.push(m);
+    }
+    return blocks;
+  }
+
+
+  /* =====================================================
+     BASE DE DATOS: FIREBASE (real) o DEMO (local)
+  ===================================================== */
+
+  function firebaseAdapter() {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const fs = firebase.firestore();
+    const auth = firebase.auth();
+    const serverTs = firebase.firestore.FieldValue.serverTimestamp;
+
+    const withId = (doc) => ({ id: doc.id, ...doc.data() });
+
+    async function freeSlots(c) {
+      await Promise.all(c.slots.map(k => fs.collection('ocupados').doc(k).delete()));
+    }
+
+    return {
+      demo: false,
+
+      // Horas ocupadas de una fecha, en tiempo real
+      watchSlots(date, cb) {
+        return fs.collection('ocupados').where('date', '==', date).onSnapshot(
+          (snap) => {
+            const set = new Set();
+            snap.forEach(d => set.add(d.data().time));
+            cb(set);
+          },
+          () => cb(new Set())
+        );
+      },
+
+      // Crea la cita y bloquea las horas en una sola operación.
+      // Si alguien tomó la hora antes, falla completa y no se duplica.
+      async book(c) {
+        const ref = fs.collection('citas').doc();
+        const batch = fs.batch();
+        batch.set(ref, { ...c, status: 'pendiente', created: serverTs() });
+        c.slots.forEach((k) => {
+          const [date, time] = k.split('_');
+          batch.set(fs.collection('ocupados').doc(k), { date, time });
+        });
+        try {
+          await batch.commit();
+        } catch (e) {
+          if (e.code === 'permission-denied') throw new Error('taken');
+          throw e;
+        }
+        return ref.id;
+      },
+
+      watchCita(id, cb) {
+        return fs.collection('citas').doc(id).onSnapshot(
+          (d) => cb(d.exists ? withId(d) : null),
+          () => {}
+        );
+      },
+
+      async cancelByClient(c) {
+        await fs.collection('citas').doc(c.id).update({ status: 'cancelada' });
+        await freeSlots(c);
+      },
+
+      // ----- Barbero -----
+      authState(cb) { return auth.onAuthStateChanged(cb); },
+      login(email, pass) { return auth.signInWithEmailAndPassword(email, pass); },
+      logout() { return auth.signOut(); },
+
+      watchAll(cb) {
+        return fs.collection('citas')
+          .where('date', '>=', todayStr())
+          .orderBy('date')
+          .onSnapshot((snap) => cb(snap.docs.map(withId)), (e) => console.error(e));
+      },
+
+      setStatus(id, status) {
+        return fs.collection('citas').doc(id).update({ status });
+      },
+
+      async cancelByBarber(c) {
+        await fs.collection('citas').doc(c.id).update({ status: 'cancelada' });
+        await freeSlots(c);
+      }
+    };
+  }
+
+  function demoAdapter() {
+    const KEY = 'jb_demo_citas';
+    const subs = new Set();
+
+    const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } };
+    const save = (arr) => { storageSet(KEY, JSON.stringify(arr)); subs.forEach(f => f()); };
+    const sub = (fn) => { subs.add(fn); fn(); return () => subs.delete(fn); };
+    window.addEventListener('storage', () => subs.forEach(f => f()));
+
+    return {
+      demo: true,
+
+      watchSlots(date, cb) {
+        return sub(() => {
+          const set = new Set();
+          load().filter(c => c.status !== 'cancelada' && c.date === date)
+            .forEach(c => c.slots.forEach(k => set.add(k.split('_')[1])));
+          cb(set);
+        });
+      },
+
+      async book(c) {
+        const arr = load();
+        const taken = new Set();
+        arr.filter(x => x.status !== 'cancelada').forEach(x => x.slots.forEach(k => taken.add(k)));
+        if (c.slots.some(k => taken.has(k))) throw new Error('taken');
+        const id = 'd' + Date.now().toString(36);
+        arr.push({ ...c, id, status: 'pendiente' });
+        save(arr);
+        return id;
+      },
+
+      watchCita(id, cb) {
+        return sub(() => cb(load().find(x => x.id === id) || null));
+      },
+
+      async cancelByClient(c) {
+        save(load().map(x => x.id === c.id ? { ...x, status: 'cancelada' } : x));
+      },
+
+      authState(cb) { cb({ demo: true }); return () => {}; },
+      login() { return Promise.resolve(); },
+      logout() { return Promise.resolve(); },
+
+      watchAll(cb) {
+        return sub(() => cb(load().filter(c => c.date >= todayStr())));
+      },
+
+      async setStatus(id, status) {
+        save(load().map(x => x.id === id ? { ...x, status } : x));
+      },
+
+      async cancelByBarber(c) {
+        save(load().map(x => x.id === c.id ? { ...x, status: 'cancelada' } : x));
+      }
+    };
+  }
+
+  const firebaseReady = !!(FIREBASE_CONFIG && window.firebase);
+  const DB = firebaseReady ? firebaseAdapter() : demoAdapter();
+  if (DB.demo) $('demoBanner').hidden = false;
+
+
+  /* =====================================================
+     MENSAJES DE WHATSAPP
+  ===================================================== */
+
+  function waLink(phone, message) {
+    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  }
+
+  // Cliente -> barbero (aviso opcional)
+  function msgToBarber(c) {
+    return `Hola Johan, soy ${c.name}. Acabo de solicitar una cita para ${servicesText(c)} ` +
+           `el ${formatDate(c.date)} a las ${c.time}. ¿Me la confirmas?`;
+  }
+
+  // Barbero -> cliente (confirmación con la hora)
+  function msgConfirmed(c) {
+    return (
+      `Hola ${c.name}, tu cita en Johan Barbershop ya ha sido confirmada ✅\n\n` +
+      `✂️ Servicio: ${servicesText(c)}\n` +
+      `📅 Fecha: ${formatDate(c.date)}\n` +
+      `🕒 Hora: ${c.time}\n` +
+      `💵 Total: DOP ${Number(c.total).toLocaleString('es-DO')}\n` +
+      `📍 ${ADDRESS}\n\n` +
+      `Te avisaremos ${REMINDER_MINUTES} minutos antes: “Ya casi es su turno”. ¡Te esperamos!`
+    );
+  }
+
+  // Barbero -> cliente (cancelación)
+  function msgCancelled(c) {
+    return `Hola ${c.name}, lamentamos informarte que tu cita en Johan Barbershop del ` +
+           `${formatDate(c.date)} a las ${c.time} fue cancelada. ` +
+           `Escríbenos si quieres reprogramarla. ¡Gracias!`;
+  }
+
+
+  /* =====================================================
+     RESERVA (CLIENTE)
+  ===================================================== */
+
+  const servicesEls = document.querySelectorAll('.service');
+  const dateInput = $('date');
+  const timesBox = $('times');
+
+  let selected = new Map();      // servicios elegidos
+  let selectedStart = null;      // minuto de inicio elegido
+  let occupied = new Set();      // horas ocupadas de la fecha actual ('0930', ...)
+  let unwatchSlots = null;
+  let activeCita = null;         // cita activa de este cliente
+  let unwatchCita = null;
+  let reminderTimer = null;
+  let lastStatus = null;
+
+  function totalDuration() {
+    let t = 0;
+    selected.forEach(s => t += s.duration);
+    return t;
+  }
+
+  function totalPrice() {
+    let t = 0;
+    selected.forEach(s => t += s.price);
+    return t;
+  }
+
+  function unitsNeeded() {
+    return Math.max(1, Math.ceil(totalDuration() / SLOT));
+  }
+
+  function updateSummary() {
+    const names = [...selected.keys()];
+    $('sumService').textContent = names.length ? names.join(' + ') : 'No seleccionado';
+    $('sumDuration').textContent = names.length ? `${totalDuration()} min` : '—';
+    $('sumPrice').textContent = `DOP ${totalPrice().toLocaleString('es-DO')}`;
+    $('sumTime').textContent = selectedStart !== null ? minLabel(selectedStart) : '—';
+  }
+
+  // Dibuja los horarios según servicios elegidos, horas ocupadas y hora actual
+  function renderTimes() {
+    timesBox.innerHTML = '';
+    const date = dateInput.value;
+    if (!date) return;
+
+    const blocks = dayBlocks(date);
+    if (!blocks) {
+      selectedStart = null;
+      timesBox.appendChild(el('div', 'hint', 'Cerrado este día. Elige otra fecha.'));
+      updateSummary();
+      return;
+    }
+
+    const set = new Set(blocks);
+    const n = unitsNeeded();
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const isToday = date === todayStr();
+    let anyFree = false;
+    let stillValid = false;
+
+    blocks.forEach((m) => {
+      let ok = true;
+      for (let k = 0; k < n; k++) {
+        const mk = m + k * SLOT;
+        if (!set.has(mk) || occupied.has(hhmm(mk))) { ok = false; break; }
+      }
+      if (isToday && m <= nowMin) ok = false;
+
+      const button = el('button', 'time' + (ok ? '' : ' unavailable'), minLabel(m));
+      button.type = 'button';
+      button.disabled = !ok;
+
+      if (ok) {
+        anyFree = true;
+        if (m === selectedStart) { button.classList.add('selected'); stillValid = true; }
+        button.addEventListener('click', () => {
+          selectedStart = m;
+          renderTimes();
+        });
+      }
+      timesBox.appendChild(button);
+    });
+
+    if (!stillValid) selectedStart = null;
+    if (!anyFree) {
+      timesBox.innerHTML = '';
+      timesBox.appendChild(el('div', 'hint', 'No hay horarios disponibles para esta fecha. Prueba con otro día.'));
+    }
+    updateSummary();
+  }
+
+  function watchDate() {
+    if (unwatchSlots) unwatchSlots();
+    occupied = new Set();
+    const date = dateInput.value;
+    if (!date) return;
+    unwatchSlots = DB.watchSlots(date, (set) => {
+      occupied = set;
+      renderTimes();
+    });
+  }
+
+  // Fechas permitidas
+  dateInput.min = todayStr();
+  dateInput.max = addDaysStr(todayStr(), MAX_DAYS_AHEAD);
+  dateInput.value = todayStr();
+
+  dateInput.addEventListener('change', () => {
+    selectedStart = null;
+    $('sumDate').textContent = dateInput.value ? formatDate(dateInput.value) : '—';
+    watchDate();
+  });
+
+  $('sumDate').textContent = formatDate(dateInput.value);
+  watchDate();
+
+  // Servicios (se pueden elegir varios)
+  servicesEls.forEach((node) => {
+    node.addEventListener('click', () => {
+      const name = node.dataset.name;
+      if (selected.has(name)) {
+        selected.delete(name);
+        node.classList.remove('selected');
+      } else {
+        selected.set(name, {
+          name,
+          price: Number(node.dataset.price),
+          duration: Number(node.dataset.duration) || SLOT
+        });
+        node.classList.add('selected');
+      }
+      selectedStart = null;
+      renderTimes();
+    });
+  });
+
+  // Datos del cliente en el resumen
+  $('clientName').addEventListener('input', (e) => {
+    $('sumName').textContent = e.target.value.trim() || '—';
+  });
+  $('clientPhone').addEventListener('input', (e) => {
+    $('sumPhone').textContent = e.target.value.trim() || '—';
+  });
+
+
+  /* =====================================================
+     RECORDATORIO "YA CASI ES SU TURNO"
+  ===================================================== */
+
+  function stopReminder() {
+    if (reminderTimer) clearInterval(reminderTimer);
+    reminderTimer = null;
+    $('countdown').textContent = '';
+  }
+
+  function startReminder(c) {
+    stopReminder();
+    const start = appointmentDate(c);
+    const reminderAt = new Date(start.getTime() - REMINDER_MINUTES * 60000);
+    let alerted = false;
+
+    const check = () => {
+      const now = new Date();
+      if (now >= start) { $('countdown').textContent = ''; clearInterval(reminderTimer); return; }
+
+      const remaining = reminderAt - now;
+      if (remaining <= 0) {
+        $('countdown').textContent = '🔔 Ya casi es su turno. ¡Te esperamos en Johan Barbershop!';
+        if (!alerted) {
+          alerted = true;
+          notify('Ya casi es su turno. ¡Te esperamos!');
+        }
+        return;
+      }
+
+      const totalMinutes = Math.floor(remaining / 60000);
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      $('countdown').textContent =
+        `🔔 Aviso “Ya casi es su turno” (${REMINDER_MINUTES} min antes) en ${hours ? hours + ' h ' : ''}${minutes} min.`;
+    };
+
+    check();
+    reminderTimer = setInterval(check, 30000);
+  }
+
+
+  /* =====================================================
+     ESTADO DE MI CITA (en tiempo real)
+  ===================================================== */
+
+  function trackCita(id) {
+    if (unwatchCita) unwatchCita();
+    lastStatus = null;
+    unwatchCita = DB.watchCita(id, onCitaUpdate);
+  }
+
+  function clearMyCita() {
+    if (unwatchCita) unwatchCita();
+    unwatchCita = null;
+    activeCita = null;
+    lastStatus = null;
+    storageDel('jb_cita_id');
+    stopReminder();
+  }
+
+  function onCitaUpdate(c) {
+    if (!c) { clearMyCita(); $('notice').hidden = true; return; }
+
+    const notice = $('notice');
+    notice.hidden = false;
+    notice.className = 'notice ' + c.status;
+
+    if (c.status === 'cancelada') {
+      $('noticeTitle').textContent = '✕ Cita cancelada';
+      $('confirmation').textContent = 'Tu cita fue cancelada. Ya puedes agendar una nueva.';
+      $('noticeButtons').hidden = true;
+      clearMyCita();
+      return;
+    }
+
+    // Si la cita ya pasó, se limpia
+    if (appointmentEnd(c) <= new Date()) { clearMyCita(); notice.hidden = true; return; }
+
+    activeCita = c;
+    $('noticeButtons').hidden = false;
+
+    $('noticeTitle').textContent = c.status === 'confirmada'
+      ? '✓ Cita confirmada'
+      : '⏳ Solicitud enviada, esperando confirmación del barbero';
+
+    $('confirmation').innerHTML =
+      `<span class="badge ${c.status}">${c.status === 'confirmada' ? 'Confirmada' : 'Pendiente'}</span><br><br>` +
+      `<b>${escapeHTML(c.name)}</b>, tu cita para <b>${escapeHTML(servicesText(c))}</b> es el ` +
+      `<b>${formatDate(c.date)}</b> a las <b>${c.time}</b> (DOP ${Number(c.total).toLocaleString('es-DO')}).<br>` +
+      `📞 Te escribiremos al <b>${prettyPhone(c.phone)}</b>.<br>` +
+      `📍 ${ADDRESS}`;
+
+    $('btnWhatsBarber').href = waLink(BARBER_PHONE, msgToBarber(c));
+
+    // Aviso dentro de la página cuando el barbero confirma
+    if (lastStatus === 'pendiente' && c.status === 'confirmada') {
+      notify(`Tu cita fue confirmada: ${formatDate(c.date)} a las ${c.time}.`);
+    }
+    lastStatus = c.status;
+
+    startReminder(c);
+  }
+
+  $('btnCancel').addEventListener('click', async () => {
+    if (!activeCita) return;
+    if (!confirm('¿Seguro que quieres cancelar tu cita?')) return;
+    try {
+      await DB.cancelByClient(activeCita);
+    } catch (e) {
+      alert('No se pudo cancelar. Escríbenos por WhatsApp para cancelarla.');
+    }
+  });
+
+  $('btnChange').addEventListener('click', async () => {
+    if (!activeCita) return;
+    if (!confirm('Se cancelará tu cita actual para que puedas elegir otra fecha u hora. ¿Continuar?')) return;
+    try {
+      await DB.cancelByClient(activeCita);
+      dateInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (e) {
+      alert('No se pudo cambiar la cita. Escríbenos por WhatsApp.');
+    }
+  });
+
+
+  /* =====================================================
+     SOLICITAR CITA
+  ===================================================== */
+
+  $('book').addEventListener('click', async () => {
+    const button = $('book');
+
+    if (activeCita) {
+      alert('Ya tienes una cita activa. Cancélala o cámbiala antes de reservar otra.');
+      $('notice').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (!selected.size) { alert('Por favor, selecciona al menos un servicio.'); return; }
+    if (!dateInput.value) { alert('Por favor, selecciona una fecha.'); return; }
+    if (selectedStart === null) { alert('Por favor, selecciona un horario.'); return; }
+
+    const name = $('clientName').value.trim();
+    if (name.length < 2) { alert('Por favor, escribe tu nombre.'); $('clientName').focus(); return; }
+
+    const phone = cleanPhone($('clientPhone').value);
+    if (!isValidPhone(phone)) {
+      alert('Por favor, escribe un número de teléfono válido (ej: 809-000-0000).');
+      $('clientPhone').focus();
+      return;
+    }
+
+    // Revisar disponibilidad una vez más
+    const n = unitsNeeded();
+    const slots = [];
+    for (let k = 0; k < n; k++) {
+      const m = selectedStart + k * SLOT;
+      if (occupied.has(hhmm(m))) { alert('Esa hora acaba de ser tomada. Elige otra.'); renderTimes(); return; }
+      slots.push(`${dateInput.value}_${hhmm(m)}`);
+    }
+
+    const cita = {
+      name,
+      phone,
+      services: [...selected.keys()],
+      total: totalPrice(),
+      durationMin: n * SLOT,
+      date: dateInput.value,
+      startMin: selectedStart,
+      time: minLabel(selectedStart),
+      slots
+    };
+
+    if (appointmentDate(cita) <= new Date()) {
+      alert('Ese horario ya pasó. Selecciona otro horario.');
+      return;
+    }
+
+    // Permiso para notificaciones
+    if ('Notification' in window && Notification.permission === 'default') {
+      try { await Notification.requestPermission(); } catch (e) {}
+    }
+
+    button.disabled = true;
+    button.textContent = 'Reservando…';
+
+    try {
+      const id = await DB.book(cita);
+      storageSet('jb_cita_id', id);
+      trackCita(id);
+      $('notice').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (e) {
+      if (e.message === 'taken') {
+        alert('Esa hora acaba de ser tomada por otra persona. Elige otra.');
+        renderTimes();
+      } else {
+        alert('No se pudo reservar la cita. Revisa tu conexión e inténtalo de nuevo.');
+        console.error(e);
+      }
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Solicitar mi cita';
+    }
+  });
+
+  // Recuperar la cita del cliente si vuelve a abrir la página
+  (function restoreCita() {
+    const id = storageGet('jb_cita_id');
+    if (id) trackCita(id);
+  })();
+
+
+  /* =====================================================
+     EXTRAS: GALERÍA, MAPA, WHATSAPP, INSTAGRAM
+  ===================================================== */
+
+  (function setupExtras() {
+    const query = encodeURIComponent('Johan Barbershop, ' + ADDRESS);
+    $('mapFrame').src = `https://www.google.com/maps?q=${query}&output=embed`;
+    $('mapsLink').href = `https://www.google.com/maps/search/?api=1&query=${query}`;
+
+    const hello = waLink(BARBER_PHONE, 'Hola Johan Barbershop, quisiera información.');
+    $('waLink').href = hello;
+    $('waFloat').href = hello;
+
+    if (INSTAGRAM_URL) {
+      $('igLink').href = INSTAGRAM_URL;
+      $('igLink').hidden = false;
+    }
+
+    if (GALLERY.length) {
+      GALLERY.forEach((p) => {
+        const img = el('img');
+        img.src = p.src;
+        img.alt = p.alt || 'Corte en Johan Barbershop';
+        img.loading = 'lazy';
+        $('galleryGrid').appendChild(img);
+      });
+      $('gallery').hidden = false;
+    }
+  })();
+
+
+  /* =====================================================
+     PANEL DEL BARBERO  (se abre con  tu-pagina#barbero)
+  ===================================================== */
+
+  let barberStarted = false;
+  let unwatchAll = null;
+  let allCitas = [];
+  let knownIds = null;
+
+  function syncMode() {
+    const barber = location.hash === '#barbero';
+    document.body.classList.toggle('barber-mode', barber);
+    if (barber && !barberStarted) { barberStarted = true; startBarber(); }
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', syncMode);
+
+  function startBarber() {
+    DB.authState((user) => {
+      if (unwatchAll) { unwatchAll(); unwatchAll = null; }
+      if (!user) {
+        $('loginBox').hidden = false;
+        $('panelBox').hidden = true;
+        return;
+      }
+      $('loginBox').hidden = true;
+      $('panelBox').hidden = false;
+      knownIds = null;
+
+      if ('Notification' in window && Notification.permission === 'default') {
+        try { Notification.requestPermission(); } catch (e) {}
+      }
+
+      unwatchAll = DB.watchAll((list) => {
+        // Avisar cuando entra una solicitud nueva
+        if (knownIds === null) {
+          knownIds = new Set(list.map(c => c.id));
+        } else {
+          list.forEach((c) => {
+            if (!knownIds.has(c.id)) {
+              knownIds.add(c.id);
+              if (c.status === 'pendiente') {
+                beep();
+                notify(`Nueva solicitud: ${c.name} · ${formatDate(c.date)} ${c.time}`);
+              }
+            }
+          });
+        }
+        allCitas = list;
+        renderAgenda();
+      });
+    });
+  }
+
+  $('loginBtn').addEventListener('click', async () => {
+    $('loginError').textContent = '';
+    try {
+      await DB.login($('loginEmail').value.trim(), $('loginPass').value);
+      $('loginPass').value = '';
+    } catch (e) {
+      $('loginError').textContent = 'Correo o contraseña incorrectos.';
+    }
+  });
+
+  $('logoutBtn').addEventListener('click', () => DB.logout());
+  $('panelFilter').addEventListener('change', renderAgenda);
+
+  function renderAgenda() {
+    const list = $('apptList');
+    list.innerHTML = '';
+
+    const filter = $('panelFilter').value;
+    const today = todayStr();
+    const limit = addDaysStr(today, 7);
+
+    let items = allCitas.slice();
+    if (filter !== 'todas') items = items.filter(c => c.status !== 'cancelada');
+    if (filter === 'hoy') items = items.filter(c => c.date === today);
+    if (filter === 'proximas') items = items.filter(c => c.date >= today && c.date <= limit);
+
+    items.sort((a, b) => a.date === b.date ? a.startMin - b.startMin : (a.date < b.date ? -1 : 1));
+
+    const pending = allCitas.filter(c => c.status === 'pendiente').length;
+    $('panelTitle').textContent = '✂️ Agenda' + (pending ? ` · ${pending} por confirmar` : '');
+
+    if (!items.length) {
+      list.appendChild(el('div', 'empty', 'No hay citas para mostrar.'));
+      return;
+    }
+
+    let currentDate = null;
+    items.forEach((c) => {
+      if (filter !== 'hoy' && c.date !== currentDate) {
+        currentDate = c.date;
+        list.appendChild(el('div', 'day-title', formatDate(c.date)));
+      }
+      list.appendChild(buildAppt(c));
+    });
+  }
+
+  function buildAppt(c) {
+    const box = el('div', 'appt ' + c.status);
+
+    const top = el('div', 'appt-top');
+    top.appendChild(el('b', '', c.time));
+    top.appendChild(el('span', 'badge ' + c.status,
+      c.status === 'confirmada' ? 'Confirmada' : c.status === 'cancelada' ? 'Cancelada' : 'Pendiente'));
+    box.appendChild(top);
+
+    box.appendChild(el('div', '', `👤 ${c.name} · 📞 ${prettyPhone(c.phone)}`));
+    box.appendChild(el('div', '', `✂️ ${servicesText(c)} · DOP ${Number(c.total).toLocaleString('es-DO')}`));
+    box.appendChild(el('small', '', `Duración: ${c.durationMin} min`));
+
+    const row = el('div', 'btn-row');
+
+    if (c.status === 'pendiente') {
+      const ok = el('a', 'btn wa', '✓ Confirmar y avisar al cliente');
+      ok.href = waLink(c.phone, msgConfirmed(c));
+      ok.target = '_blank';
+      ok.rel = 'noopener';
+      ok.addEventListener('click', () => { DB.setStatus(c.id, 'confirmada'); });
+      row.appendChild(ok);
+    }
+
+    if (c.status === 'confirmada') {
+      const again = el('a', 'btn wa', '📲 Reenviar confirmación');
+      again.href = waLink(c.phone, msgConfirmed(c));
+      again.target = '_blank';
+      again.rel = 'noopener';
+      row.appendChild(again);
+    }
+
+    if (c.status !== 'cancelada') {
+      const call = el('a', 'btn', '📞 Llamar');
+      call.href = `tel:+${c.phone}`;
+      row.appendChild(call);
+
+      const cancel = el('button', 'btn danger', '✕ Cancelar cita');
+      cancel.type = 'button';
+      cancel.addEventListener('click', () => {
+        if (!confirm(`¿Cancelar la cita de ${c.name}? Se le abrirá WhatsApp para avisarle.`)) return;
+        window.open(waLink(c.phone, msgCancelled(c)), '_blank');
+        DB.cancelByBarber(c);
+      });
+      row.appendChild(cancel);
+    }
+
+    box.appendChild(row);
+    return box;
+  }
+
+  syncMode();
+
+</script>
+
+</body>
+</html>
